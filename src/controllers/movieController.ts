@@ -2,7 +2,9 @@ import { Request, Response } from "express";
 import {
   getMovies,
   getMovie,
-  addMovie
+  addMovie,
+  editMovie,
+  removeMovie
 } from "../services/movieService";
 
 export async function getAllMovies(req: Request, res: Response) {
@@ -165,6 +167,92 @@ export async function createMovie(
     res.status(500).json({
       success: false,
       message: "Failed to create movie"
+    });
+  }
+}
+export async function updateMovie(
+  req: Request,
+  res: Response
+) {
+  try {
+    const id = Number(req.params.id);
+
+    if (isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid movie ID"
+      });
+    }
+
+    const movie = await getMovie(id);
+
+    if (!movie) {
+      return res.status(404).json({
+        success: false,
+        message: "Movie not found"
+      });
+    }
+
+    const updated = await editMovie(id, req.body);
+
+    if (!updated) {
+      return res.status(400).json({
+        success: false,
+        message: "No fields provided for update"
+      });
+    }
+
+    const updatedMovie = await getMovie(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Movie updated successfully",
+      data: updatedMovie
+    });
+  } catch (error) {
+    console.error("Update movie error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update movie"
+    });
+  }
+}
+export async function deleteMovie(
+  req: Request,
+  res: Response
+) {
+  try {
+    const id = Number(req.params.id);
+
+    if (isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid movie ID"
+      });
+    }
+
+    const movie = await getMovie(id);
+
+    if (!movie) {
+      return res.status(404).json({
+        success: false,
+        message: "Movie not found"
+      });
+    }
+
+    await removeMovie(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Movie deleted successfully"
+    });
+  } catch (error) {
+    console.error("Delete movie error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete movie"
     });
   }
 }

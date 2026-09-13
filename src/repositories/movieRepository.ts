@@ -200,3 +200,81 @@ export async function createMovie(movie: CreateMovieData) {
 
   return movieId;
 }
+export interface UpdateMovieData {
+  title?: string;
+  description?: string;
+  release_year?: number;
+  rating?: number;
+  runtime?: number;
+  poster_url?: string;
+  backdrop_url?: string;
+  trailer_url?: string;
+}
+
+export async function updateMovie(
+  id: number,
+  movie: UpdateMovieData
+) {
+  const fields: string[] = [];
+
+  const escapeSql = (value: string) =>
+    value.replace(/'/g, "''");
+
+  if (movie.title !== undefined) {
+    fields.push(`title = '${escapeSql(movie.title)}'`);
+  }
+
+  if (movie.description !== undefined) {
+    fields.push(`description = '${escapeSql(movie.description)}'`);
+  }
+
+  if (movie.release_year !== undefined) {
+    fields.push(`release_year = ${movie.release_year}`);
+  }
+
+  if (movie.rating !== undefined) {
+    fields.push(`rating = ${movie.rating}`);
+  }
+
+  if (movie.runtime !== undefined) {
+    fields.push(`runtime = ${movie.runtime}`);
+  }
+
+  if (movie.poster_url !== undefined) {
+    fields.push(`poster_url = '${escapeSql(movie.poster_url)}'`);
+  }
+
+  if (movie.backdrop_url !== undefined) {
+    fields.push(`backdrop_url = '${escapeSql(movie.backdrop_url)}'`);
+  }
+
+  if (movie.trailer_url !== undefined) {
+    fields.push(`trailer_url = '${escapeSql(movie.trailer_url)}'`);
+  }
+
+  if (fields.length === 0) {
+    return false;
+  }
+
+  fields.push("updated_at = GETDATE()");
+
+  const query = `
+    UPDATE movies
+    SET ${fields.join(", ")}
+    WHERE id = ${id};
+  `;
+
+  await queryDB(query);
+
+  return true;
+}
+export async function deleteMovie(id: number) {
+  const query = `
+    DELETE FROM movies
+    WHERE id = ${id};
+  `;
+
+  await queryDB(query);
+
+  return true;
+}
