@@ -106,13 +106,26 @@ export async function discover(
   res: Response
 ) {
   try {
+    const type = req.query.type
+      ? String(req.query.type)
+      : "movie";
+
     const genre = req.query.genre
       ? String(req.query.genre)
       : undefined;
 
+    const year = req.query.year
+      ? String(req.query.year)
+      : undefined;
+
     const page = Number(req.query.page) || 1;
 
-    const data = await discoverMovies(genre, page);
+    const data = await discoverMovies(
+      type,
+      genre,
+      year,
+      page
+    );
 
     res.json(data);
   } catch (error) {

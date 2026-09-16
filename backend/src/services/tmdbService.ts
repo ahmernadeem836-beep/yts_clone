@@ -38,22 +38,32 @@ export async function searchMovies(query: string, page = 1) {
     `/search/movie?query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=${page}`
   );
 }
-
 export async function getMovieDetails(id: number) {
   return tmdbRequest(
-    `/movie/${id}?language=en-US&append_to_response=videos,credits`
+    `/movie/${id}?language=en-US&append_to_response=videos,credits,similar`
   );
 }
-
 export async function discoverMovies(
+  type = "movie",
   genre?: string,
+  year?: string,
   page = 1
 ) {
+  const mediaType = type === "tv" ? "tv" : "movie";
+
   let endpoint =
-    `/discover/movie?include_adult=false&include_video=false&language=en-US&page=${page}&sort_by=popularity.desc`;
+    `/discover/${mediaType}?include_adult=false&include_video=false&language=en-US&page=${page}&sort_by=popularity.desc`;
 
   if (genre) {
     endpoint += `&with_genres=${encodeURIComponent(genre)}`;
+  }
+
+  if (year) {
+    if (mediaType === "movie") {
+      endpoint += `&primary_release_year=${encodeURIComponent(year)}`;
+    } else {
+      endpoint += `&first_air_date_year=${encodeURIComponent(year)}`;
+    }
   }
 
   return tmdbRequest(endpoint);
